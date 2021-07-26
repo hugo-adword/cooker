@@ -21,7 +21,7 @@ mka api-stubs-docs || echo no problem, we need ccache
 mka system-api-stubs-docs || echo no problem we need ccache
 mka test-api-stubs-docs || echo no problem, we need ccache
 mka derp -j10 & # dont remove that '&'
-sleep 68m
+sleep 75m
 kill %1
 ccache -s
 #and dont use below codes for first 1 or 2 times, to get ccache uploaded,
@@ -48,7 +48,7 @@ tg(){
 id=-1001273969756 # Your telegram id
 
 #get some ccache message
-tg $id "Got some ccache"
+tg $id "Got some ccache (Derp)"
 
 # Create rclone config first
 mkdir -p ~/.config/rclone
