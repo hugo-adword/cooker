@@ -1,0 +1,78 @@
+#!/bin/bash
+cd /tmp/rom # Depends on where source got synced
+
+curl https://gist.githubusercontent.com/SuperCosmicBeing/c6db35d8abfa480e183a66b71ffca563/raw/3f5f1fc6d02ae767479bda37c04ea417a229f7eb/gms_full.mk >> gms_full.mk
+mv gms_full.mk vendor/gms/
+rm -rf device/generic/opengl-transport
+
+# Normal build steps
+. build/envsetup.sh
+lunch derp_vince-user
+export CCACHE_DIR=/tmp/ccache
+export CCACHE_EXEC=$(which ccache)
+export USE_CCACHE=1
+ccache -M 20G # It took only 6.4GB for mido
+ccache -o compression=true # Will save times and data to download and upload ccache, also negligible performance issue
+ccache -z # Clear old stats, so monitor script will provide real ccache statistics
+
+# Next 8 lines should be run first to collect ccache and then upload, after doning it 1 or 2 times, our ccache will help to build without these 8 lines.
+#mka sepolicy
+#mka api-stubs-docs || echo no problem, we need ccache
+#mka system-api-stubs-docs || echo no problem we need ccache
+#mka test-api-stubs-docs || echo no problem, we need ccache
+#mka derp -j10 & # dont remove that '&'
+#sleep 75m
+#kill %1
+#ccache -s
+#and dont use below codes for first 1 or 2 times, to get ccache uploaded,
+
+
+# upload function for uploading rom zip file! I don't want unwanted builds in my google drive haha!
+up(){
+	curl --upload-file $1 https://transfer.sh/$(basename $1); echo
+	# 14 days, 10 GB limit
+}
+
+# It's recommended to use google drive(rclone) as upload solution for coping with the time limit. Un-comment next 3 lines to upload with rclone in drive. Also change drive and junk according to your config name, uploading folder of drive
+#up(){
+#	time rclone copy $1 drive:junk -P # drive is my rclone config name, 
+#}
+
+tg(){
+	bot_api=$bot_api_code # Your tg bot api 
+	your_telegram_id=$1 # No need to touch 
+	msg=$2 # No need to touch
+	curl -s "https://api.telegram.org/bot${bot_api}/sendmessage" --data "text=$msg&chat_id=${your_telegram_id}&parse_mode=html"
+}
+
+id=-1001273969756 # Your telegram id
+
+#get some ccache message
+#tg $id "Got some ccache"
+tg $id "Machine:<b>Cores: $(nproc) cores<b>RAM: 32GB RAM"
+
+# Create rclone config first
+mkdir -p ~/.config/rclone
+echo "$rclone_config" > ~/.config/rclone/rclone.conf 
+
+# Upload rom zip file if succeed to build! Send notification to tg! And send shell to tg if build fails!
+
+# Send Build started message on start of build
+tg $id "Build started (Derp)"
+
+# Let's compile by parts! Coz of ram issue!
+mka api-stubs-docs || echo no problem
+mka system-api-stubs-docs || echo no problem
+mka test-api-stubs-docs || echo no problem
+
+mka derp -j10 \
+        && send_zip=$(up out/target/product/vince/D*.zip) && tg $id "Build Succeed! $send_zip" 
+#	|| tmate -S /tmp/tmate.sock new-session -d && tmate -S /tmp/tmate.sock wait tmate-ready && send_shell=$(tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}') && tg $id "Build Failed" && tg $id "$send_shell" && ccache -s && sleep 2h # later we'll  check this
+up out/target/product/vince/DerpFest*.sha256sum && echo "Sent sha256sum file "
+up out/target/product/vince/vince.json && echo "Sent json file "
+
+tg $id "Build uploaded"
+tg $id "Link: https://ancient-bush-fa07.010-hugo-ad.workers.dev/junk/$(basename out/target/product/vince/Der*.zip)"
+ls out/target/product/vince # Show out directory content
+#ccache -s # Let's print ccache statistics finally
+#tg $id "Cache\n\n$(ccache -s)"
