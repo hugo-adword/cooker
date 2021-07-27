@@ -21,7 +21,7 @@ mka api-stubs-docs || echo no problem, we need ccache
 mka system-api-stubs-docs || echo no problem we need ccache
 mka test-api-stubs-docs || echo no problem, we need ccache
 mka derp -j10 & # dont remove that '&'
-sleep 75m
+sleep 73m
 kill %1
 ccache -s
 #and dont use below codes for first 1 or 2 times, to get ccache uploaded,
@@ -49,9 +49,9 @@ id=-1001273969756 # Your telegram id
 
 #get some ccache message
 tg $id "Got some ccache (Derp)"
-tg $id "Machine
-RAM: 32GB
-Core: 10"
+tg $id "<b>Machine</b> :
+<b>RAM:</b> 32GB 
+<b>Core:</b> 10"
 
 # Create rclone config first
 mkdir -p ~/.config/rclone
@@ -77,4 +77,5 @@ echo "$rclone_config" > ~/.config/rclone/rclone.conf
 #tg $id "Link: https://ancient-bush-fa07.010-hugo-ad.workers.dev/junk/$(basename out/target/product/vince/Der*.zip)"
 ls out/target/product/vince # Show out directory content
 #ccache -s # Let's print ccache statistics finally
-tg $id "Cache\n\n$(ccache -s)"
+tg $id "<b>Cache</b> :
+$(ccache -s)"
