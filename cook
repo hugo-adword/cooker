@@ -5,6 +5,9 @@ curl https://gist.githubusercontent.com/SuperCosmicBeing/c6db35d8abfa480e183a66b
 mv gms_full.mk vendor/gms/
 rm -rf device/generic/opengl-transport
 
+curl https://hastebin.com/raw/zexecexina.xml > keyguard_pin_view.xml
+mv keyguard_pin_view.xml frameworks_base/packages/SystemUI/res-keyguard/layout/
+
 # Normal build steps
 . build/envsetup.sh
 lunch derp_vince-user
