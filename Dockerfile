@@ -2,7 +2,7 @@ FROM ubuntu:focal
 # Use Ubuntu Bionic/Focal LTS image as base
 
 # Add legacy label for maintainer
-LABEL maintainer="hugo-adword <00.hugo.ad@gmail.com>"
+LABEL maintainer="aseelpsathar <aseelsathar@gmail.com>"
 
 ENV \
   DEBIAN_FRONTEND=noninteractive \
